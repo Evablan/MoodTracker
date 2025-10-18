@@ -23,8 +23,13 @@ class DatabaseSeeder extends Seeder
                 EmotionSeeder::class,
                 CauseSeeder::class,
                 QuestionSeeder::class,
-                DemoDataSeeder::class,
+
             ]);
+            if (app()->environment('local')) {
+                $this->call([
+                    DemoDataSeeder::class,
+                ]);
+            }
         });
     }
 }
