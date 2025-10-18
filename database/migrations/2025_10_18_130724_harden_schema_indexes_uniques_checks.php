@@ -10,41 +10,67 @@ return new class extends Migration
     public function up(): void
     {
         /**
-         * 1) UNICIDAD por key en catálogos (parcial → PostgreSQL)
-         * - Evita duplicados globales y por empresa.
-         * - Usamos índices únicos parciales con WHERE (company_id IS NULL/NOT NULL).
+         * 1) UNICIDAD por key en catálogos.
+         *    - Si el catálogo tiene company_id → índices únicos parciales (global y por empresa).
+         *    - Si no tiene company_id → único simple por key.
          */
 
-        // emotions
-        DB::statement("CREATE UNIQUE INDEX IF NOT EXISTS uq_emotions_key_global
-                       ON public.emotions (key)
-                       WHERE company_id IS NULL;");
+        // EMOTIONS
+        if (Schema::hasColumn('emotions', 'company_id')) {
+            DB::statement("
+                CREATE UNIQUE INDEX IF NOT EXISTS uq_emotions_key_global
+                ON public.emotions (key)
+                WHERE company_id IS NULL;
+            ");
+            DB::statement("
+                CREATE UNIQUE INDEX IF NOT EXISTS uq_emotions_company_key
+                ON public.emotions (company_id, key)
+                WHERE company_id IS NOT NULL;
+            ");
+        } else {
+            Schema::table('emotions', function (Blueprint $table) {
+                $table->unique('key', 'uq_emotions_key');
+            });
+        }
 
-        DB::statement("CREATE UNIQUE INDEX IF NOT EXISTS uq_emotions_company_key
-                       ON public.emotions (company_id, key)
-                       WHERE company_id IS NOT NULL;");
+        // CAUSES
+        if (Schema::hasColumn('causes', 'company_id')) {
+            DB::statement("
+                CREATE UNIQUE INDEX IF NOT EXISTS uq_causes_key_global
+                ON public.causes (key)
+                WHERE company_id IS NULL;
+            ");
+            DB::statement("
+                CREATE UNIQUE INDEX IF NOT EXISTS uq_causes_company_key
+                ON public.causes (company_id, key)
+                WHERE company_id IS NOT NULL;
+            ");
+        } else {
+            Schema::table('causes', function (Blueprint $table) {
+                $table->unique('key', 'uq_causes_key');
+            });
+        }
 
-        // causes
-        DB::statement("CREATE UNIQUE INDEX IF NOT EXISTS uq_causes_key_global
-                       ON public.causes (key)
-                       WHERE company_id IS NULL;");
-
-        DB::statement("CREATE UNIQUE INDEX IF NOT EXISTS uq_causes_company_key
-                       ON public.causes (company_id, key)
-                       WHERE company_id IS NOT NULL;");
-
-        // questions
-        DB::statement("CREATE UNIQUE INDEX IF NOT EXISTS uq_questions_key_global
-                       ON public.questions (key)
-                       WHERE company_id IS NULL;");
-
-        DB::statement("CREATE UNIQUE INDEX IF NOT EXISTS uq_questions_company_key
-                       ON public.questions (company_id, key)
-                       WHERE company_id IS NOT NULL;");
+        // QUESTIONS
+        if (Schema::hasColumn('questions', 'company_id')) {
+            DB::statement("
+                CREATE UNIQUE INDEX IF NOT EXISTS uq_questions_key_global
+                ON public.questions (key)
+                WHERE company_id IS NULL;
+            ");
+            DB::statement("
+                CREATE UNIQUE INDEX IF NOT EXISTS uq_questions_company_key
+                ON public.questions (company_id, key)
+                WHERE company_id IS NOT NULL;
+            ");
+        } else {
+            Schema::table('questions', function (Blueprint $table) {
+                $table->unique('key', 'uq_questions_key');
+            });
+        }
 
         /**
-         * 2) ÍNDICES para rendimiento
-         * - Consultas por fecha/empresa/departamento/emoción.
+         * 2) ÍNDICES para rendimiento en consultas habituales.
          */
         Schema::table('mood_entries', function (Blueprint $table) {
             $table->index(['company_id', 'entry_date'], 'idx_mood_entries_company_date');
@@ -57,27 +83,31 @@ return new class extends Migration
         Schema::table('mood_entry_answers', function (Blueprint $table) {
             $table->index('mood_entry_id', 'idx_mea_entry');
             $table->index('question_id', 'idx_mea_question');
-
-            // Una respuesta por pregunta dentro de una entrada
+            // Evita duplicar la misma pregunta en el mismo envío
             $table->unique(['mood_entry_id', 'question_id'], 'uq_mea_entry_question');
         });
 
         /**
-         * 3) CHECKS de integridad
+         * 3) CHECKS (validaciones a nivel BBDD).
          */
 
-        // mood_entries.work_quality entre 1 y 10
-        DB::statement("ALTER TABLE public.mood_entries
-                       ADD CONSTRAINT chk_mood_entries_work_quality
-                       CHECK (work_quality BETWEEN 1 AND 10);");
+        // work_quality entre 1 y 10
+        DB::statement("
+            ALTER TABLE public.mood_entries
+            ADD CONSTRAINT chk_mood_entries_work_quality
+            CHECK (work_quality BETWEEN 1 AND 10);
+        ");
 
-        // questions.type dentro de los permitidos
-        DB::statement("ALTER TABLE public.questions
-                       ADD CONSTRAINT chk_questions_type
-                       CHECK (type IN ('scale','bool','select'));");
+        // questions.type dentro del conjunto permitido
+        DB::statement("
+            ALTER TABLE public.questions
+            ADD CONSTRAINT chk_questions_type
+            CHECK (type IN ('scale','bool','select'));
+        ");
 
-      // Si la pregunta es de escala → min/max obligatorios y coherentes
-DB::statement(<<<'SQL'
+        // Si type = 'scale' → min/max obligatorios y coherentes
+        DB::statement(
+            <<<'SQL'
 ALTER TABLE public.questions
 ADD CONSTRAINT chk_questions_scale_bounds
 CHECK (
@@ -85,10 +115,11 @@ CHECK (
   OR (min_value IS NOT NULL AND max_value IS NOT NULL AND min_value < max_value)
 );
 SQL
-);
+        );
 
-// mood_entry_answers: exactamente UNA de las tres columnas de respuesta debe venir rellena
-DB::statement(<<<'SQL'
+        // En mood_entry_answers debe venir EXACTAMENTE una de las tres respuestas
+        DB::statement(
+            <<<'SQL'
 ALTER TABLE public.mood_entry_answers
 ADD CONSTRAINT chk_mea_exactly_one_answer
 CHECK (
@@ -98,38 +129,92 @@ CHECK (
   = 1
 );
 SQL
-);
-
+        );
+    }
 
     public function down(): void
     {
-        // Quitar CHECKS
-        @DB::statement(\"ALTER TABLE public.mood_entries DROP CONSTRAINT IF EXISTS chk_mood_entries_work_quality;\");
-        @DB::statement(\"ALTER TABLE public.questions   DROP CONSTRAINT IF EXISTS chk_questions_type;\");
-        @DB::statement(\"ALTER TABLE public.questions   DROP CONSTRAINT IF EXISTS chk_questions_scale_bounds;\");
-        @DB::statement(\"ALTER TABLE public.mood_entry_answers DROP CONSTRAINT IF EXISTS chk_mea_exactly_one_answer;\");
+        // Quitar CHECKS (con IF EXISTS por seguridad)
+        @DB::statement("ALTER TABLE public.mood_entries        DROP CONSTRAINT IF EXISTS chk_mood_entries_work_quality;");
+        @DB::statement("ALTER TABLE public.questions          DROP CONSTRAINT IF EXISTS chk_questions_type;");
+        @DB::statement("ALTER TABLE public.questions          DROP CONSTRAINT IF EXISTS chk_questions_scale_bounds;");
+        @DB::statement("ALTER TABLE public.mood_entry_answers DROP CONSTRAINT IF EXISTS chk_mea_exactly_one_answer;");
 
-        // Quitar UNIQUEs parciales (índices)
-        @DB::statement(\"DROP INDEX IF EXISTS uq_emotions_key_global;\");
-        @DB::statement(\"DROP INDEX IF EXISTS uq_emotions_company_key;\");
-        @DB::statement(\"DROP INDEX IF EXISTS uq_causes_key_global;\");
-        @DB::statement(\"DROP INDEX IF EXISTS uq_causes_company_key;\");
-        @DB::statement(\"DROP INDEX IF EXISTS uq_questions_key_global;\");
-        @DB::statement(\"DROP INDEX IF EXISTS uq_questions_company_key;\");
+        // Quitar UNIQUEs parciales/índices (PostgreSQL)
+        @DB::statement("DROP INDEX IF EXISTS uq_emotions_key_global;");
+        @DB::statement("DROP INDEX IF EXISTS uq_emotions_company_key;");
+        @DB::statement("DROP INDEX IF EXISTS uq_causes_key_global;");
+        @DB::statement("DROP INDEX IF EXISTS uq_causes_company_key;");
+        @DB::statement("DROP INDEX IF EXISTS uq_questions_key_global;");
+        @DB::statement("DROP INDEX IF EXISTS uq_questions_company_key;");
+
+        // Quitar UNIQUEs simples si se crearon con Schema builder
+        if (Schema::hasTable('emotions')) {
+            Schema::table('emotions', function (Blueprint $table) {
+                try {
+                    $table->dropUnique('uq_emotions_key');
+                } catch (\Throwable $e) {
+                }
+            });
+        }
+        if (Schema::hasTable('causes')) {
+            Schema::table('causes', function (Blueprint $table) {
+                try {
+                    $table->dropUnique('uq_causes_key');
+                } catch (\Throwable $e) {
+                }
+            });
+        }
+        if (Schema::hasTable('questions')) {
+            Schema::table('questions', function (Blueprint $table) {
+                try {
+                    $table->dropUnique('uq_questions_key');
+                } catch (\Throwable $e) {
+                }
+            });
+        }
 
         // Quitar índices normales
-        Schema::table('mood_entries', function (Blueprint $table) {
-            $table->dropIndex('idx_mood_entries_company_date');
-            $table->dropIndex('idx_mood_entries_dept_date');
-            $table->dropIndex('idx_mood_entries_emotion');
-            $table->dropIndex('idx_mood_entries_cause');
-            $table->dropIndex('idx_mood_entries_user');
-        });
+        if (Schema::hasTable('mood_entries')) {
+            Schema::table('mood_entries', function (Blueprint $table) {
+                try {
+                    $table->dropIndex('idx_mood_entries_company_date');
+                } catch (\Throwable $e) {
+                }
+                try {
+                    $table->dropIndex('idx_mood_entries_dept_date');
+                } catch (\Throwable $e) {
+                }
+                try {
+                    $table->dropIndex('idx_mood_entries_emotion');
+                } catch (\Throwable $e) {
+                }
+                try {
+                    $table->dropIndex('idx_mood_entries_cause');
+                } catch (\Throwable $e) {
+                }
+                try {
+                    $table->dropIndex('idx_mood_entries_user');
+                } catch (\Throwable $e) {
+                }
+            });
+        }
 
-        Schema::table('mood_entry_answers', function (Blueprint $table) {
-            $table->dropIndex('idx_mea_entry');
-            $table->dropIndex('idx_mea_question');
-            $table->dropUnique('uq_mea_entry_question');
-        });
+        if (Schema::hasTable('mood_entry_answers')) {
+            Schema::table('mood_entry_answers', function (Blueprint $table) {
+                try {
+                    $table->dropIndex('idx_mea_entry');
+                } catch (\Throwable $e) {
+                }
+                try {
+                    $table->dropIndex('idx_mea_question');
+                } catch (\Throwable $e) {
+                }
+                try {
+                    $table->dropUnique('uq_mea_entry_question');
+                } catch (\Throwable $e) {
+                }
+            });
+        }
     }
 };
