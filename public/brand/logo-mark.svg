@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" aria-hidden="true">
+    <defs>
+        <!-- Gradiente corporativo -->
+        <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#146BA8" />
+            <stop offset="42%" stop-color="#2F6FBE" />
+            <stop offset="72%" stop-color="#5B61F6" />
+            <stop offset="100%" stop-color="#FF8A65" />
+        </linearGradient>
+
+        <!-- Sombra interior sutil -->
+        <filter id="innerShadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feOffset dx="0" dy="1" />
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="out" result="inverse" />
+            <feFlood flood-color="#000000" flood-opacity="0.10" />
+            <feComposite operator="in" in2="inverse" />
+            <feComposite operator="over" in2="SourceGraphic" />
+        </filter>
+
+        <!-- Máscara: dejamos arco superior completo; cortamos a la izquierda (línea fina)
+           y fabricamos el "brazo" horizontal de la G en el lateral derecho -->
+        <!-- blanco = visible, negro = recortado -->
+        <mask id="ringMask">
+            <rect x="0" y="0" width="200" height="200" fill="white" />
+            <!-- Corte IZQUIERDO horizontal (fino, como en la referencia) -->
+            <rect x="0" y="94" width="90" height="44" rx="6" fill="black" />
+            <!-- Ventana para crear el BRAZO derecho de la G:
+             recorta sólo la zona media-alta derecha, dejando arco arriba e inferior intactos -->
+            <rect x="150" y="88" width="60" height="44" rx="6" fill="black" />
+        </mask>
+    </defs>
+
+    <!-- ANILLO: grueso, con cortes laterales según la máscara.
+         stroke-linecap="butt" para que los extremos queden planos como en la foto -->
+    <g filter="url(#innerShadow)">
+        <circle cx="100" cy="100" r="78"
+            fill="none"
+            stroke="url(#brandGradient)"
+            stroke-width="20"
+            stroke-linecap="butt"
+            mask="url(#ringMask)" />
+    </g>
+
+    <!-- ONDA interior con mismo gradiente -->
+    <path
+        d="M 48.2 132
+         C 54 140, 58 96, 68 96
+         C 78 96, 84 128, 96 128
+         C 108 128, 114 116, 126 116
+         L 150 116"
+        fill="none"
+        stroke="url(#brandGradient)"
+        stroke-width="18"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        filter="url(#innerShadow)" />
+    <!-- BARRAS en azul marino sólido -->
+    <g fill="#0F2742">
+        <rect x="118" y="60" width="10" height="42" rx="2" />
+        <rect x="134" y="52" width="12" height="50" rx="2" />
+    </g>
+</svg>
+  
