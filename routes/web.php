@@ -20,6 +20,14 @@ Route::prefix('moods')->name('moods.')->controller(MoodEmotionController::class)
     Route::post('/', 'store')->name('store'); // Guardar el formulario de mood emotion
 });
 
+/*Dashboard Admin, rrhh */
+Route::middleware(['auth', 'can:admin-hr'])->group(function () {
+    Route::get('/admin/dashboard', function () {
+        Route::get('/admin', fn() => redirect('/admin/dashboard'));
+        Route::get('/admin/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'overview']);
+    });
+});
+
 
 
 

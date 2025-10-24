@@ -31,6 +31,7 @@ class UserSeeder extends Seeder
             ['name' => 'Eva Blanco', 'email' => 'eva@democorp.test',  'department_id' => $deptIT],
             ['name' => 'Luis Pérez', 'email' => 'luis@democorp.test', 'department_id' => $deptSup],
             ['name' => 'Marta Ruiz', 'email' => 'marta@democorp.test', 'department_id' => $deptIT],
+            ['name' => 'Eva Blanco Admin', 'email' => 'evablancomart@gmail.com', 'department_id' => $deptIT], // Admin user
         ];
 
         foreach ($people as $p) {

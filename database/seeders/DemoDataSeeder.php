@@ -74,18 +74,42 @@ class DemoDataSeeder extends Seeder
                 'updated_at'    => $now,
             ]);
 
-            // Respuestas a las 4 preguntas (escala 1..5)
+            // Respuestas según el tipo de pregunta
             foreach ($questions as $q) {
-                $val = random_int($q->min_value ?? 1, $q->max_value ?? 5);
-                DB::table('mood_entry_answers')->insert([
+                $answerData = [
                     'mood_entry_id'     => $entryId,
                     'question_id'       => $q->id,
-                    'answer_numeric'    => $val,
-                    'answer_bool'       => null,
-                    'answer_option_key' => null,
                     'created_at'        => $now,
                     'updated_at'        => $now,
-                ]);
+                ];
+
+                // Insertar respuesta según el tipo de pregunta
+                if ($q->type === 'scale') {
+                    $val = random_int($q->min_value ?? 1, $q->max_value ?? 5);
+                    $answerData['answer_numeric'] = $val;
+                    $answerData['answer_bool'] = null;
+                    $answerData['answer_option_key'] = null;
+                } elseif ($q->type === 'bool') {
+                    $answerData['answer_numeric'] = null;
+                    $answerData['answer_bool'] = (bool) random_int(0, 1);
+                    $answerData['answer_option_key'] = null;
+                } elseif ($q->type === 'select') {
+                    // Para select, usar una opción aleatoria si hay opciones disponibles
+                    $options = json_decode($q->options_json ?? '[]', true);
+                    if (!empty($options)) {
+                        $randomOption = $options[array_rand($options)];
+                        $answerData['answer_numeric'] = null;
+                        $answerData['answer_bool'] = null;
+                        $answerData['answer_option_key'] = $randomOption['key'] ?? 'option_' . random_int(1, 3);
+                    } else {
+                        // Si no hay opciones, usar un valor por defecto
+                        $answerData['answer_numeric'] = null;
+                        $answerData['answer_bool'] = null;
+                        $answerData['answer_option_key'] = 'default_option';
+                    }
+                }
+
+                DB::table('mood_entry_answers')->insert($answerData);
             }
         }
 
