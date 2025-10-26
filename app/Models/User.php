@@ -45,4 +45,45 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // app/Models/User.php
+    public function roles()
+    {
+        return $this->belongsToMany(\App\Models\Role::class)->withPivot('company_id');
+    }
+
+    public function hasRole(string $roleName, $companyId = null): bool
+    {
+        $roles = $this->roles;
+        if ($companyId !== null) {
+            return $roles->where('pivot.company_id', $companyId)->contains('name', $roleName)
+                || $roles->where('name', 'super_admin')->isNotEmpty(); // super_admin siempre pasa
+        }
+        return $roles->contains('name', $roleName) || $roles->contains('name', 'super_admin');
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('super_admin') || $this->hasRole('hr_admin');
+    }
+
+    public function isManager(): bool
+    {
+        return $this->hasRole('manager');
+    }
+
+    public function isEmployee(): bool
+    {
+        return $this->hasRole('employee');
+    }
+
+    public function assignRole(string $roleName, $companyId = null): void
+    {
+        $role = Role::where('name', $roleName)->first();
+        if ($role) {
+            $this->roles()->syncWithoutDetaching([
+                $role->id => ['company_id' => $companyId]
+            ]);
+        }
+    }
 }
