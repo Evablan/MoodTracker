@@ -109,11 +109,11 @@
 
         <!-- Charts Row -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- IGB Trend Chart -->
-            <div class="bg-white rounded-lg shadow-md p-6">
+            <!-- IGB Trend Chart - Deshabilitado temporalmente -->
+            {{-- <div class="bg-white rounded-lg shadow-md p-6">
                 <h3 class="text-lg font-semibold mb-4">Tendencia IGB</h3>
                 <canvas id="igbLine" width="400" height="200"></canvas>
-            </div>
+            </div> --}}
 
             <!-- Emotion KPIs -->
             <div class="bg-white rounded-lg shadow-md p-6">
@@ -185,49 +185,11 @@
         </div>
     </div>
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js - Deshabilitado temporalmente -->
+    {{-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Validar que los datos existen antes de crear el gráfico
-            const trendData = @json($trend ?? []);
-
-            if (trendData && trendData.length > 0) {
-                // Línea IGB
-                const trendCtx = document.getElementById('igbLine').getContext('2d');
-                new Chart(trendCtx, {
-                    type: 'line',
-                    data: {
-                        labels: trendData.map(item => item.day),
-                        datasets: [{
-                            label: 'IGB',
-                            data: trendData.map(item => item.igb),
-                            borderColor: 'rgb(59, 130, 246)',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            tension: 0.1,
-                            fill: false,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 100
-                            }
-                        }
-                    }
-                });
-            } else {
-                // Mostrar mensaje si no hay datos
-                const canvas = document.getElementById('igbLine');
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#6B7280';
-                ctx.font = '16px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('No hay datos disponibles', canvas.width / 2, canvas.height / 2);
-            }
+            // Gráfico IGB deshabilitado temporalmente
         });
-    </script>
+    </script> --}}
 @endsection

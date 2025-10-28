@@ -47,8 +47,8 @@ class DashboardController extends Controller
             // --- 5) Calcular IGB
             $igb = $this->calculateIgb($emotionKpis, $cqp);
 
-            // --- 6) Tendencia diaria usando Query Builder
-            $trend = $this->getTrendData($from, $to);
+            // --- 6) Tendencia diaria (eliminada - causaba problemas de renderizado en Chart.js)
+            $trend = [];
 
             // --- 7) Alertas de usuarios con baja energía
             $alerts = $this->getAlerts($from, $to);
@@ -113,15 +113,20 @@ class DashboardController extends Controller
      */
     private function getEmotionKpis($from, $to)
     {
+        $validKeys = ['q_energy_motivation', 'q_flow_focus', 'q_social_support', 'q_future_outlook'];
+
         return DB::table('mood_entry_answers as mea')
             ->join('mood_entries as me', 'me.id', '=', 'mea.mood_entry_id')
-            ->join('questions as q', 'q.id', '=', 'mea.question_id')
+            ->join('questions as q', function ($join) use ($validKeys) {
+                $join->on('q.id', '=', 'mea.question_id')
+                    ->whereIn('q.key', $validKeys);
+            })
             ->selectRaw('
                 ROUND(AVG(CASE WHEN q.key = ? THEN mea.answer_numeric END) * 20, 2) as ieo,
                 ROUND(AVG(CASE WHEN q.key = ? THEN mea.answer_numeric END) * 20, 2) as ifc,
                 ROUND(AVG(CASE WHEN q.key = ? THEN mea.answer_numeric END) * 20, 2) as ias,
                 ROUND(AVG(CASE WHEN q.key = ? THEN mea.answer_numeric END) * 20, 2) as ipf
-            ', ['q_energy_motivation', 'q_flow_focus', 'q_social_support', 'q_future_outlook'])
+            ', $validKeys)
             ->whereBetween('me.created_at', [$from, $to])
             ->first();
     }
@@ -153,76 +158,6 @@ class DashboardController extends Controller
         return round(($ieo + $ifc + $ias + $ipf + $cqp) / 5, 2);
     }
 
-    /**
-     * Tendencia diaria del IGB
-     */
-    private function getTrendData($from, $to)
-    {
-        try {
-            // Primero verificar si existen datos
-            $moodEntriesCount = DB::table('mood_entries')->count();
-            $questionsCount = DB::table('questions')->count();
-
-            \Log::info('Debug Trend Data:', [
-                'mood_entries_count' => $moodEntriesCount,
-                'questions_count' => $questionsCount,
-                'from' => $from,
-                'to' => $to
-            ]);
-
-            // Si no hay datos, retornar array vacío
-            if ($moodEntriesCount == 0 || $questionsCount == 0) {
-                \Log::warning('No hay datos en mood_entries o questions');
-                return [];
-            }
-
-            // Verificar qué claves de preguntas existen
-            $existingKeys = DB::table('questions')->pluck('key')->toArray();
-            \Log::info('Existing question keys:', $existingKeys);
-
-            // Usar las claves que realmente existen
-            $validKeys = array_intersect([
-                'q_energy_motivation',
-                'q_flow_focus',
-                'q_social_support',
-                'q_future_outlook'
-            ], $existingKeys);
-
-            if (empty($validKeys)) {
-                \Log::warning('No se encontraron claves de preguntas válidas');
-                return [];
-            }
-
-            $trend = DB::table('mood_entries as me')
-                ->join('mood_entry_answers as mea', 'me.id', '=', 'mea.mood_entry_id')
-                ->join('questions as q', 'q.id', '=', 'mea.question_id')
-                ->selectRaw('
-                    DATE(me.created_at) as day,
-                    ROUND(AVG(CASE WHEN q.key = ? THEN mea.answer_numeric END) * 20, 2) as ieo,
-                    ROUND(AVG(CASE WHEN q.key = ? THEN mea.answer_numeric END) * 20, 2) as ifc,
-                    ROUND(AVG(CASE WHEN q.key = ? THEN mea.answer_numeric END) * 20, 2) as ias,
-                    ROUND(AVG(CASE WHEN q.key = ? THEN mea.answer_numeric END) * 20, 2) as ipf,
-                    ROUND(AVG(me.work_quality) * 10, 2) as cqp
-                ', $validKeys)
-                ->whereBetween('me.created_at', [$from, $to])
-                ->groupBy(DB::raw('DATE(me.created_at)'))
-                ->orderBy('day')
-                ->get()
-                ->map(function ($item) {
-                    $igb = round(($item->ieo + $item->ifc + $item->ias + $item->ipf + $item->cqp) / 5, 2);
-                    return [
-                        'day' => $item->day,
-                        'igb' => $igb
-                    ];
-                });
-
-            \Log::info('Trend data result:', $trend->toArray());
-            return $trend->toArray();
-        } catch (\Exception $e) {
-            \Log::error('Error en getTrendData: ' . $e->getMessage());
-            return [];
-        }
-    }
 
     /**
      * Método alternativo usando Eloquent (más legible)
@@ -294,7 +229,10 @@ class DashboardController extends Controller
     {
         return DB::table('mood_entries as me')
             ->join('mood_entry_answers as mea', 'me.id', '=', 'mea.mood_entry_id')
-            ->join('questions as q', 'q.id', '=', 'mea.question_id')
+            ->join('questions as q', function ($join) {
+                $join->on('q.id', '=', 'mea.question_id')
+                    ->where('q.key', 'q_energy_motivation');
+            })
             ->join('users as u', 'u.id', '=', 'me.user_id')
             ->selectRaw('
                 me.user_id,
