@@ -37,6 +37,10 @@ class DatabaseSeeder extends Seeder
                     DemoDataSeeder::class, // genera entradas y respuestas de los últimos 30 días
                 ]);
             }
+            // Settings (local y staging)
+            if (app()->environment(['local', 'staging'])) {
+                $this->call(SettingsSeeder::class);
+            }
         });
     }
 }
