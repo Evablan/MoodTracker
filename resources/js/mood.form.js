@@ -1,6 +1,9 @@
 //Obtener elementos del DOM
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Salir si no es la página del formulario de registro de emociones
+    const form = document.getElementById('moodForm');
+    if (!form) return;
 
     //Obtener el elemento del radio button
     const emotionRadio = document.querySelectorAll('input[name="emotion"]'); //Obtener el elemento del radio button de la emoción
@@ -40,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
     function showQuestions() {
+        if (!questionsContainer) return;   // ⛑️ evita null
         questionsContainer.classList.remove('hidden');
         questionsContainer.classList.add('space-y-6');
     }
@@ -116,6 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateSubmitButton() {
         const validation = validateCompleteForm();
         const submitBtn = document.getElementById('submitBtn');
+        if (!submitBtn) return;   // ⛑️ evita null
 
         if (validation.isValid) {
             submitBtn.disabled = false;
@@ -161,6 +166,11 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    // ⛑️ Salir si no es la página del formulario
+    const form = document.getElementById('moodForm');
+    if (!form) return;
+
     const emoHidden = document.getElementById('emotion_key');
     const causeHidden = document.getElementById('cause_key');
 

@@ -299,6 +299,10 @@
                     </button>
 
                 </form>
+
+                @push('scripts')
+                    @vite('resources/js/mood_form.js')
+                @endpush
             </div> {{-- Cierre del contenedor interno --}}
         </div> {{-- Cierre del contenedor con sombra --}}
     </div> {{-- Cierre del contenedor principal --}}
