@@ -4,11 +4,22 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MoodEmotionController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Auth\GoogleController;
 
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/auth/redirect/google', [GoogleController::class, 'redirect'])
+    ->name('google.redirect');
+
+Route::get('/auth/callback/google', [GoogleController::class, 'callback'])
+    ->name('google.callback');
+
+// Página de login con botones SSO
+Route::view('/login', 'auth.login')->name('login')->middleware('guest');
+
 
 /*Página de dashboard user*/
 Route::get('/dashboard', function () {

@@ -215,6 +215,26 @@ ADMIN_EMAIL=evablancomart@gmail.com
 
 ## 🧭 Registro de Cambios (Docs de Proyecto)
 
+### Actualizaciones backend (Oct 2025)
+
+- Nuevo almacén de configuración `settings` con helper `setting($key, $default)`.
+- Tablas y modelos de `alerts` y `audit_logs` con relaciones y factories.
+- Factories realistas para Company/Department/User/Alert/AuditLog/Setting.
+- Seeder `SettingsSeeder` con: `anon_threshold=5`, `iec_alert_threshold=60`, `send_window="Mon 17:00-18:00"`.
+- Documentación detallada: ver `docs/MOODTRACKER_BACKEND_CHANGES.md`.
+
+Uso rápido:
+```php
+// Leer configuración
+$min = setting('anon_threshold', 5);
+
+// Generar datos demo en Tinker
+\App\Models\User::factory()->create();
+\App\Models\Alert::factory()->create();
+\App\Models\AuditLog::factory()->create();
+\App\Models\Setting::factory()->create();
+```
+
 ### Migración del JS del formulario a Vite
 
 - Fecha: 2025-09-25
