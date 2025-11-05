@@ -21,6 +21,11 @@ return [
     'resend' => [
         'key' => env('RESEND_KEY'),
     ],
+    'google' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect'      => env('GOOGLE_REDIRECT_URI'),
+    ],
 
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
@@ -34,11 +39,7 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
 
-        'google' => [
-            'client_id'     => env('GOOGLE_CLIENT_ID'),
-            'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-            'redirect'      => env('GOOGLE_REDIRECT_URI'),
-        ],
+
 
     ],
 

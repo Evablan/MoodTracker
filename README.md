@@ -114,20 +114,38 @@ php artisan serve
 
 ### Rutas principales
 
-- **Formulario principal**: `http://localhost:8000/moods/create`
+- **Login**: `http://localhost:8000/login` (email/password o Google OAuth)
+- **Formulario principal**: `http://localhost:8000/moods/create` (requiere autenticación y consentimiento para empleados)
+- **Dashboard**: `http://localhost:8000/dashboard` (requiere autenticación, solo para admin/rrhh)
+- **Consentimiento**: `http://localhost:8000/consent` (solo para empleados sin consentimiento)
 - **Página de inicio**: `http://localhost:8000/`
 - **Cambio de idioma**: `http://localhost:8000/lang/{locale}` (es|en|fr)
 
 ### Acceso al formulario
 
-1. Navegar a `/moods/create`
-2. Completar las 3 secciones del formulario:
+1. **Iniciar sesión** en `/login`:
+   - **Opción 1**: Login tradicional con email y contraseña
+   - **Opción 2**: Login con Google OAuth (botón "Continuar con Google")
+2. **Consentimiento** (solo empleados): Si es tu primera vez, acepta los términos y condiciones
+3. Navegar a `/moods/create` (empleados) o `/dashboard` (admin/rrhh)
+4. Completar las 3 secciones del formulario:
    - Calidad del trabajo (escala 1-10)
    - Selección de emoción (5 opciones disponibles)
    - Preguntas dinámicas según emoción seleccionada
    - Causa de la emoción (trabajo/personal/ambos)
 
 ## ✨ Características Implementadas
+
+### 🔐 Sistema de Autenticación y Consentimiento
+- **Doble método de login**: Email/contraseña tradicional y Google OAuth
+- **Autenticación con Google**: Integración completa con Laravel Socialite
+- **Sistema de consentimiento obligatorio**: Solo para empleados, admins pueden acceder sin consentimiento
+- **Redirección inteligente**: Según el rol del usuario (employee → formulario, admin/rrhh → dashboard)
+- **Middleware de protección**: `EnsureUserConsented` protege rutas que requieren consentimiento
+- **Manejo de errores OAuth**: Fallback automático para `InvalidStateException`
+- **Roles de usuario**: employee, hr_admin, admin, manager con permisos diferenciados
+
+**Documentación completa**: Ver `docs/AUTENTICACION_GOOGLE_CONSENTIMIENTO.md`
 
 ### 🌍 Sistema de Internacionalización
 - **3 idiomas soportados**: Español, Inglés, Francés
@@ -278,6 +296,30 @@ Motivación técnica:
 - Gestión de dependencias y orden de carga desde `app.js`.
 - Mejor DX con HMR en desarrollo.
 
+### Sistema de Autenticación Google OAuth y Consentimiento (2025-11-03)
+- **Autenticación con Google**: Implementación completa con Laravel Socialite
+- **Login tradicional**: Formulario de email/contraseña añadido a la vista de login
+- **Sistema de consentimiento**: Obligatorio para empleados, opcional para admins
+- **Middleware de protección**: `EnsureUserConsented` verifica consentimiento antes de acceder a rutas protegidas
+- **Redirección por roles**: Empleados → formulario, Admins/RRHH → dashboard
+- **Migración de consentimiento**: Añadidos campos `consent_at` y `role` a tabla `users`
+- **Manejo de errores OAuth**: Fallback con `stateless()` para `InvalidStateException`
+- **Configuración OAuth**: Variables de entorno y configuración en `config/services.php`
+- **Controladores creados**: `GoogleController` y `ConsentController`
+- **Vista de consentimiento**: Formulario informativo con términos y condiciones
+- **Documentación completa**: `docs/AUTENTICACION_GOOGLE_CONSENTIMIENTO.md` con guía detallada
+
+**Configuración requerida**:
+```env
+GOOGLE_CLIENT_ID=tu_client_id
+GOOGLE_CLIENT_SECRET=tu_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:8000/auth/callback/google
+```
+
+**Usuarios de prueba**:
+- Empleado: `eva@democorp.test` / `secret123`
+- Admin: `evablancomart@gmail.com` / `secret123`
+
 ### Configuración PostgreSQL y migraciones (2025-10-17)
 - Migración de SQLite → PostgreSQL.
 - Creación de usuario y DB: `moodtracker_user` / `moodtracker_dev`.
@@ -345,7 +387,7 @@ Motivación técnica:
 
 ### Funcionalidades Pendientes
 - [x] ~~Implementar almacenamiento en base de datos~~ ✅ **COMPLETADO**
-- [ ] Sistema de autenticación de usuarios
+- [x] ~~Sistema de autenticación de usuarios~~ ✅ **COMPLETADO**
 - [ ] Dashboard con gráficos de analytics
 - [ ] Exportación de reportes
 - [ ] API REST para integraciones

@@ -30,7 +30,13 @@ class UserFactory extends Factory
             'department_id' => Department::factory(),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'email_verified_at' => fake()->optional()->dateTime(),
             'password' => static::$password ??= Hash::make('password'),
+            'provider' => 'local',
+            'external_id' => null,
+            'status' => 'active',
+            'consent_at' => fake()->optional()->dateTime(),
+            'role' => 'employee',
         ];
     }
 

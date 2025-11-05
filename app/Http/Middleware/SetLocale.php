@@ -19,6 +19,11 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next)
     {
+        // Saltar middleware para rutas de OAuth para evitar conflictos con Socialite
+        if ($request->is('auth/redirect/*') || $request->is('auth/callback/*')) {
+            return $next($request);
+        }
+
         // Obtener idioma de la sesión o usar por defecto
         $locale = Session::get('locale', config('app.locale', 'es'));
 

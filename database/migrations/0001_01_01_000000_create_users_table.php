@@ -16,6 +16,8 @@ return new class extends Migration {
             $table->string('email');
             $table->unique(['company_id', 'email']); // único por empresa
 
+            $table->timestampTz('email_verified_at')->nullable();
+
             // SSO listo
             $table->string('provider')->default('local'); // local|google|microsoft
             $table->string('external_id')->nullable();

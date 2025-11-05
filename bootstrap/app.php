@@ -10,10 +10,16 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
-    //Agregar el middleware de setLocale
+    //Agregar los middlewares globales y alias
     ->withMiddleware(function (Middleware $middleware): void {
+        // Middlewares que se ejecutan en TODAS las rutas web
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
+        ]);
+
+        // Alias para usar en rutas específicas
+        $middleware->alias([
+            'consented' => \App\Http\Middleware\EnsureUserConsented::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

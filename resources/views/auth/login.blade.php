@@ -33,10 +33,51 @@
                     </div>
 
                     <h2 class="mb-2 text-2xl font-bold leading-tight">Inicia sesión</h2>
-                    <p class="mb-8 text-sm text-slate-300">
+                    <p class="mb-6 text-sm text-slate-300">
                         Accede con tu cuenta corporativa. No compartimos tu contraseña; solo confirmamos tu identidad
                         con Google o Microsoft.
                     </p>
+
+                    <!-- Formulario de login tradicional -->
+                    <form method="POST" action="{{ route('login.post') }}" class="mb-6">
+                        @csrf
+
+                        <!-- Email -->
+                        <div class="mb-4">
+                            <label for="email" class="mb-2 block text-sm font-medium text-slate-200">Email</label>
+                            <input type="email" id="email" name="email" value="{{ old('email') }}"
+                                class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2.5 text-white placeholder-slate-400 focus:border-fuchsia-300 focus:outline-none focus:ring-2 focus:ring-fuchsia-300"
+                                placeholder="tu@empresa.com" required>
+                            @error('email')
+                                <p class="mt-1 text-sm text-red-300">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-4">
+                            <label for="password"
+                                class="mb-2 block text-sm font-medium text-slate-200">Contraseña</label>
+                            <input type="password" id="password" name="password"
+                                class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2.5 text-white placeholder-slate-400 focus:border-fuchsia-300 focus:outline-none focus:ring-2 focus:ring-fuchsia-300"
+                                placeholder="••••••••" required>
+                            @error('password')
+                                <p class="mt-1 text-sm text-red-300">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Botón submit -->
+                        <button type="submit"
+                            class="w-full rounded-xl bg-fuchsia-500 px-4 py-3 text-base font-semibold text-white transition hover:bg-fuchsia-600 focus:outline-none focus:ring-2 focus:ring-fuchsia-300">
+                            Iniciar sesión
+                        </button>
+                    </form>
+
+                    <!-- Separador -->
+                    <div class="mb-6 flex items-center gap-4">
+                        <div class="flex-1 border-t border-white/20"></div>
+                        <span class="text-xs text-slate-400">o</span>
+                        <div class="flex-1 border-t border-white/20"></div>
+                    </div>
 
                     <div class="space-y-3">
                         <!-- Google -->

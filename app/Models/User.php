@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -12,6 +13,7 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
     use Notifiable;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -19,9 +21,17 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'company_id',
+        'department_id',
         'name',
         'email',
+        'email_verified_at',
         'password',
+        'provider',
+        'external_id',
+        'status',
+        'consent_at',
+        'role',
     ];
 
     /**
@@ -45,10 +55,23 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'consent_at' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'deleted_at' => 'datetime',
         ];
     }
 
     // app/Models/User.php
+    public function company()
+    {
+        return $this->belongsTo(\App\Models\Company::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(\App\Models\Department::class);
+    }
+
     public function roles()
     {
         return $this->belongsToMany(\App\Models\Role::class)->withPivot('company_id');

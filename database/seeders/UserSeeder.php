@@ -28,10 +28,10 @@ class UserSeeder extends Seeder
         ];
 
         $people = [
-            ['name' => 'Eva Blanco', 'email' => 'eva@democorp.test',  'department_id' => $deptIT],
-            ['name' => 'Luis Pérez', 'email' => 'luis@democorp.test', 'department_id' => $deptSup],
-            ['name' => 'Marta Ruiz', 'email' => 'marta@democorp.test', 'department_id' => $deptIT],
-            ['name' => 'Eva Blanco Admin', 'email' => 'evablancomart@gmail.com', 'department_id' => $deptIT], // Admin user
+            ['name' => 'Eva Blanco', 'email' => 'eva@democorp.test',  'department_id' => $deptIT, 'role' => 'employee'],
+            ['name' => 'Luis Pérez', 'email' => 'luis@democorp.test', 'department_id' => $deptSup, 'role' => 'employee'],
+            ['name' => 'Marta Ruiz', 'email' => 'marta@democorp.test', 'department_id' => $deptIT, 'role' => 'employee'],
+            ['name' => 'Eva Blanco Admin', 'email' => 'evablancomart@gmail.com', 'department_id' => $deptIT, 'role' => 'hr_admin'], // Admin user
         ];
 
         foreach ($people as $p) {
@@ -49,6 +49,7 @@ class UserSeeder extends Seeder
             if ($cols['provider'])    $row['provider']  = 'local';
             if ($cols['external_id']) $row['external_id'] = null;
             if ($cols['status'])      $row['status']     = 'active';
+            if (Schema::hasColumn('users', 'role')) $row['role'] = $p['role'] ?? 'employee';
             if ($cols['password']) {
                 $row['password'] = Hash::make('secret123');
                 if ($cols['remember']) $row['remember_token'] = Str::random(10);
