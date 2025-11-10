@@ -92,6 +92,11 @@ Route::post('/logout', function () {
     return redirect('/login');
 })->name('logout');
 
+// Password reset (placeholder - implementar según necesidades)
+Route::get('/password/reset', function () {
+    return redirect('/login')->with('info', 'Funcionalidad de recuperación de contraseña próximamente disponible.');
+})->name('password.request');
+
 // Dashboard Admin, rrhh
 Route::middleware(['auth', 'consented'])->group(function () {
     Route::get('/admin', fn() => redirect('/admin/dashboard'));

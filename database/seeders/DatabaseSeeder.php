@@ -41,6 +41,10 @@ class DatabaseSeeder extends Seeder
             if (app()->environment(['local', 'staging'])) {
                 $this->call(SettingsSeeder::class);
             }
+            // Absences (local y staging)
+            if (app()->environment(['local', 'staging'])) {
+                $this->call(AbsenceSeeder::class);
+            }
         });
     }
 }

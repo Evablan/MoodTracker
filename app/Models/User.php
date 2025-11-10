@@ -74,17 +74,18 @@ class User extends Authenticatable
 
     public function roles()
     {
-        return $this->belongsToMany(\App\Models\Role::class)->withPivot('company_id');
+        return $this->belongsToMany(\App\Models\Role::class)
+            ->withPivot('company_id')
+            ->withTimestamps(); // para que se actualice el created_at y updated_at
     }
 
-    public function hasRole(string $roleName, $companyId = null): bool
+    public function hasRole(string $name, ?int $companyId = null): bool
     {
-        $roles = $this->roles;
+        $q = $this->roles()->where('name', $name);
         if ($companyId !== null) {
-            return $roles->where('pivot.company_id', $companyId)->contains('name', $roleName)
-                || $roles->where('name', 'super_admin')->isNotEmpty(); // super_admin siempre pasa
+            $q->wherePivot('company_id', $companyId);
         }
-        return $roles->contains('name', $roleName) || $roles->contains('name', 'super_admin');
+        return $q->exists();
     }
 
     public function isAdmin(): bool
@@ -102,13 +103,14 @@ class User extends Authenticatable
         return $this->hasRole('employee');
     }
 
-    public function assignRole(string $roleName, $companyId = null): void
+    public function assignRole(string $name, int $companyId): void
     {
-        $role = Role::where('name', $roleName)->first();
-        if ($role) {
-            $this->roles()->syncWithoutDetaching([
-                $role->id => ['company_id' => $companyId]
-            ]);
-        }
+        $roleId = \App\Models\Role::where('name', $name)->value('id');
+        $this->roles()->syncWithoutDetaching([$roleId => ['company_id' => $companyId]]);
+    }
+
+    public function absences()
+    {
+        return $this->hasMany(Absence::class);
     }
 }

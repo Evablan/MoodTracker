@@ -1,0 +1,775 @@
+/**
+ * Login Page - Glass Card Design
+ * Sistema de temas: yellow (referencia) y moodtracker (marca)
+ * Accesible, responsive y performante
+ */
+
+/* ============================================
+   1. VARIABLES DE TEMA
+   Cambiar THEME en el HTML para alternar
+   ============================================ */
+:root {
+    /* Tema Yellow (referencia) */
+    --hero-1: #7F007F;
+    --hero-2: #7F007F;
+    --ink: #FFFFFF;
+    --text-muted: rgba(255, 255, 255, 0.75);
+    --card-border: rgba(255, 255, 255, 0.35);
+    --card-bg: rgba(255, 255, 255, 0.01);
+    --cta-bg: #0F0F10;
+    --error: #EF4444;
+
+    /* Tipografía */
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Tema MoodTracker (marca) */
+[data-theme="moodtracker"] {
+    --hero-1: #1A2240;
+    --hero-2: #8857FF;
+    --ink: #FFFFFF;
+    --text-muted: rgba(255, 255, 255, 0.75);
+    --card-border: rgba(255, 255, 255, 0.35);
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --cta-bg: #0F0F10;
+    --error: #EF4444;
+}
+
+/* Tema Yellow (explícito) */
+[data-theme="yellow"] {
+    --hero-1: #7F007F;
+    --hero-2: #7F007F;
+}
+
+/* ============================================
+   2. RESET Y BASE
+   ============================================ */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.5;
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ============================================
+   3. HERO BACKGROUND (Fondo emocional con profundidad)
+   ============================================ */
+.hero-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+    background: #4A0E4E;
+    /* Color base oscuro */
+}
+
+/* Capa base: Gradiente principal con variación emocional */
+.hero-gradient {
+    position: absolute;
+    inset: 0;
+    background:
+        /* Capa de luz superior - simula iluminación desde arriba */
+        radial-gradient(ellipse 120% 100% at 50% 0%, rgba(180, 50, 200, 0.4) 0%, transparent 50%),
+        /* Puntos de luz emocionales - áreas más brillantes */
+        radial-gradient(circle 600px at 20% 30%, rgba(160, 30, 180, 0.5) 0%, transparent 60%),
+        radial-gradient(circle 500px at 80% 20%, rgba(170, 40, 190, 0.45) 0%, transparent 55%),
+        radial-gradient(circle 400px at 15% 70%, rgba(150, 20, 170, 0.4) 0%, transparent 50%),
+        /* Gradientes intermedios para transición suave */
+        radial-gradient(ellipse 90% 70% at 30% 40%, rgba(140, 10, 160, 0.6) 0%, transparent 65%),
+        radial-gradient(ellipse 80% 60% at 70% 60%, rgba(130, 0, 150, 0.55) 0%, transparent 60%),
+        /* Capa de profundidad - áreas más oscuras */
+        radial-gradient(ellipse 100% 80% at 50% 80%, rgba(80, 0, 100, 0.8) 0%, rgba(60, 0, 80, 0.9) 40%, rgba(40, 0, 60, 1) 70%),
+        /* Gradiente base con variación vertical */
+        linear-gradient(180deg,
+            rgba(100, 10, 120, 0.9) 0%,
+            rgba(80, 0, 100, 0.95) 30%,
+            rgba(70, 0, 90, 1) 60%,
+            rgba(50, 0, 70, 1) 100%);
+}
+
+/* Capa 1: Efectos de profundidad y textura */
+.hero-background::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        /* Formas difuminadas para textura */
+        radial-gradient(circle 800px at 10% 50%, rgba(200, 60, 220, 0.15) 0%, transparent 50%),
+        radial-gradient(circle 700px at 90% 40%, rgba(190, 50, 210, 0.12) 0%, transparent 45%),
+        radial-gradient(ellipse 60% 50% at 5% 80%, rgba(180, 40, 200, 0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 95% 70%, rgba(170, 30, 190, 0.15) 0%, transparent 50%),
+        /* Efectos de sombra para profundidad */
+        radial-gradient(ellipse 70% 60% at 50% 90%, rgba(30, 0, 50, 0.4) 0%, transparent 60%);
+    opacity: 1;
+    mix-blend-mode: overlay;
+    filter: blur(1px);
+}
+
+/* Capa 2: Iluminación y contraste emocional */
+.hero-background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        /* Puntos de luz brillantes */
+        radial-gradient(circle 400px at 25% 25%, rgba(220, 80, 240, 0.2) 0%, transparent 50%),
+        radial-gradient(circle 350px at 75% 35%, rgba(210, 70, 230, 0.18) 0%, transparent 45%),
+        radial-gradient(ellipse 50% 35% at 40% 15%, rgba(200, 60, 220, 0.15) 0%, transparent 40%),
+        /* Transiciones de color para emoción */
+        radial-gradient(ellipse 80% 50% at 60% 50%, rgba(160, 20, 180, 0.25) 0%, transparent 70%);
+    opacity: 0.9;
+    mix-blend-mode: screen;
+    filter: blur(2px);
+}
+
+/* Capas adicionales de profundidad emocional */
+.depth-layer {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(60px);
+    opacity: 0.6;
+}
+
+.depth-layer-1 {
+    width: 900px;
+    height: 900px;
+    top: -200px;
+    left: -200px;
+    background: radial-gradient(circle, rgba(200, 50, 220, 0.4) 0%, transparent 70%);
+    animation: floatDepth1 20s ease-in-out infinite;
+}
+
+.depth-layer-2 {
+    width: 700px;
+    height: 700px;
+    bottom: -150px;
+    right: -150px;
+    background: radial-gradient(circle, rgba(180, 30, 200, 0.35) 0%, transparent 65%);
+    animation: floatDepth2 25s ease-in-out infinite;
+}
+
+.depth-layer-3 {
+    width: 600px;
+    height: 600px;
+    top: 50%;
+    left: 10%;
+    transform: translateY(-50%);
+    background: radial-gradient(circle, rgba(190, 40, 210, 0.3) 0%, transparent 60%);
+    animation: floatDepth3 18s ease-in-out infinite;
+}
+
+/* Animaciones sutiles para las capas de profundidad */
+@keyframes floatDepth1 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: translate(30px, -40px) scale(1.1);
+        opacity: 0.7;
+    }
+}
+
+@keyframes floatDepth2 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: translate(-25px, 35px) scale(1.05);
+        opacity: 0.6;
+    }
+}
+
+@keyframes floatDepth3 {
+
+    0%,
+    100% {
+        transform: translateY(-50%) translateX(0) scale(1);
+        opacity: 0.4;
+    }
+
+    50% {
+        transform: translateY(-50%) translateX(20px) scale(1.08);
+        opacity: 0.5;
+    }
+}
+
+/* Respeta prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .depth-layer-1,
+    .depth-layer-2,
+    .depth-layer-3 {
+        animation: none;
+    }
+}
+
+/* ============================================
+   4. GLASS CARD
+   ============================================ */
+.glass-card {
+    position: relative;
+    z-index: 10;
+    max-width: 600px;
+    width: 100%;
+    flex: 0 1 auto;
+    margin: 0;
+    padding: 32px;
+    background: var(--card-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1.5px solid var(--card-border);
+    border-radius: 28px;
+    /* Efecto 3D de elevación - múltiples sombras para profundidad */
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.3),
+        0 10px 30px rgba(0, 0, 0, 0.2),
+        0 5px 15px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+        0 2px 4px rgba(255, 255, 255, 0.1) inset;
+    transform: translateY(0);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Mantener el login centrado verticalmente independientemente del logo */
+    align-self: center;
+}
+
+/* Efecto hover para aumentar la elevación */
+.glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.35),
+        0 15px 40px rgba(0, 0, 0, 0.25),
+        0 8px 20px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+        0 2px 4px rgba(255, 255, 255, 0.15) inset;
+}
+
+/* Borde superior iluminado para efecto 3D */
+.glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.4) 20%,
+            rgba(255, 255, 255, 0.5) 50%,
+            rgba(255, 255, 255, 0.4) 80%,
+            transparent 100%);
+    border-radius: 28px 28px 0 0;
+    pointer-events: none;
+}
+
+/* Responsive: reducir padding en móvil */
+@media (max-width: 1024px) {
+    .login-main {
+        flex-direction: column;
+        justify-content: center;
+        gap: 2rem;
+        padding: 2rem 1rem;
+    }
+
+    .logo-section {
+        max-width: 100%;
+        justify-content: center;
+        padding-left: 0;
+        padding-bottom: 1rem;
+    }
+
+    .brand-logo {
+        max-height: 180px;
+    }
+
+    .glass-card {
+        max-width: 100%;
+        margin: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .login-main {
+        padding: 1.5rem 1rem;
+        gap: 1.5rem;
+    }
+
+    .logo-section {
+        padding-bottom: 0.5rem;
+    }
+
+    .brand-logo {
+        max-height: 150px;
+    }
+
+    .glass-card {
+        padding: 24px 20px;
+        border-radius: 20px;
+    }
+}
+
+/* ============================================
+   5. TIPOGRAFÍA
+   ============================================ */
+.login-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.login-subtitle {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 32px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+@media (max-width: 640px) {
+    .login-title {
+        font-size: 1.5rem;
+    }
+
+    .login-subtitle {
+        font-size: 0.75rem;
+    }
+}
+
+/* ============================================
+   6. FORM INPUTS
+   ============================================ */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    width: 24px;
+    height: 24px;
+    color: #0F0F10;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.form-input {
+    width: 100%;
+    height: 56px;
+    padding: 0 14px 0 44px;
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #0F0F10;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input::placeholder {
+    color: rgba(15, 15, 16, 0.5);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #111;
+    border-width: 2px;
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
+}
+
+.form-input:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+}
+
+.form-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Password toggle button */
+.password-toggle {
+    position: absolute;
+    right: 14px;
+    background: none;
+    border: none;
+    color: rgba(15, 15, 16, 0.6);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 4px 8px;
+    z-index: 1;
+    transition: color 0.2s;
+}
+
+.password-toggle:hover {
+    color: #0F0F10;
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.password-toggle:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   7. CTA BUTTON
+   ============================================ */
+.cta-button {
+    width: 100%;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    background: var(--cta-bg);
+    color: var(--ink);
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    margin-top: 24px;
+}
+
+.cta-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.04);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.cta-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.cta-button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+}
+
+.cta-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.cta-button .arrow-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* Loading state */
+.cta-button.loading {
+    pointer-events: none;
+}
+
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--ink);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================
+   8. ERROR MESSAGES
+   ============================================ */
+.error-message {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.875rem;
+    color: var(--error);
+    font-weight: 500;
+}
+
+.error-message[role="alert"] {
+    animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-4px);
+    }
+
+    75% {
+        transform: translateX(4px);
+    }
+}
+
+/* ============================================
+   9. SEPARATOR
+   ============================================ */
+.separator {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 32px 0;
+}
+
+.separator-line {
+    flex: 1;
+    height: 1px;
+    background: var(--card-border);
+}
+
+.separator-text {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-transform: lowercase;
+    font-weight: 500;
+}
+
+/* ============================================
+   10. GOOGLE LOGIN BUTTON
+   ============================================ */
+.google-login-wrapper {
+    margin-top: 0;
+}
+
+.google-button {
+    width: 100%;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    background: var(--cta-bg);
+    color: var(--ink);
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    gap: 12px;
+}
+
+.google-button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.04);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+    color: var(--ink);
+}
+
+.google-button:active {
+    transform: translateY(0);
+}
+
+.google-button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+}
+
+.google-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.google-button .arrow-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.google-button span {
+    flex: 1;
+    text-align: left;
+}
+
+.google-button.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.google-button.loading .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--ink);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-right: 8px;
+}
+
+/* ============================================
+   11. LOGIN INFO TEXT
+   ============================================ */
+.login-info {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* ============================================
+   12. HELP LINK
+   ============================================ */
+.help-link {
+    display: block;
+    text-align: center;
+    margin-top: 24px;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.help-link:hover {
+    color: var(--ink);
+}
+
+.help-link:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* ============================================
+   13. MAIN LAYOUT
+   ============================================ */
+.login-main {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem 5%;
+    gap: 4rem;
+}
+
+/* Logo Section (Left) */
+.logo-section {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    max-width: 50%;
+    padding-left: 2rem;
+    padding-top: 0.5rem;
+    /* Alineación independiente del contenedor padre */
+    align-self: flex-start;
+}
+
+.brand-logo {
+    max-width: 100%;
+    height: auto;
+    max-height: 300px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.brand-logo:hover {
+    transform: scale(1.02);
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.3));
+}
+
+/* ============================================
+   14. PREFERS-REDUCED-MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============================================
+   15. UTILITIES
+   ============================================ */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+}
